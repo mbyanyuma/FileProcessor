@@ -259,3 +259,7 @@ paket-files/
 # Python Tools for Visual Studio (PTVS)
 __pycache__/
 *.pyc
+/MyClasses/MyClassesTests/App.config
+/MyClasses/MyClassesTests/packages.config
+/MyClasses/MyClassesTests/Properties
+/MyClasses/MyClasses/Properties
