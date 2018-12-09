@@ -1,6 +1,8 @@
 ﻿using System;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using MyClasses;
+using System.Configuration;
+using System.IO;
 
 
 namespace MyClassesTests
@@ -9,7 +11,8 @@ namespace MyClassesTests
     public class FileProcessTest
     {
         //constants
-        private readonly string badFileName = @"c:/marketwatch.stocks";
+        private const string BadFileName = @"c:/marketwatch.stocks";
+        private string _goodFileName;
 
         [TestMethod]
         public void FileNameDoesExist()
@@ -18,7 +21,10 @@ namespace MyClassesTests
             FileProcess fp = new FileProcess();
 
             //Act
-            var actual = fp.FileExists(@"c:/users/mbyan/documents/sampleTextFiles/testFile.txt");
+            SetGoodFileName();
+            File.AppendAllText(_goodFileName, "CR7 > Messi");
+            var actual = fp.FileExists(_goodFileName);
+            File.Delete(_goodFileName);
 
             //Assert
             Assert.IsTrue(actual);
@@ -31,7 +37,7 @@ namespace MyClassesTests
             FileProcess fp = new FileProcess();
 
             //Act
-            var actual = fp.FileExists(badFileName);
+            var actual = fp.FileExists(BadFileName);
 
             //Assert
             Assert.IsFalse(actual);
@@ -51,6 +57,16 @@ namespace MyClassesTests
 
             //Assert
             
+        }
+
+        private void SetGoodFileName()
+        {
+            _goodFileName = ConfigurationManager.AppSettings["GoodFileName"];
+            if (_goodFileName.Contains("[AppPath]"))
+            {
+                _goodFileName = _goodFileName.Replace("[AppPath]",
+                    Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData));
+            }
         }
     }
 }
