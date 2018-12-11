@@ -15,6 +15,8 @@ namespace MyClassesTests
         private const string BadFileName = @"c:/marketwatch.stocks";
         private string _goodFileName;
 
+        private const string FILE_NAME = @"FileToDeploy.txt";
+
         public TestContext TestContext { get; set; }
 
         #region Class Initialize and Cleanup
@@ -60,6 +62,10 @@ namespace MyClassesTests
             #endregion
 
         [TestMethod]
+        [Description("Check to see if a file does exist")]
+        [Owner("mosesb")]
+        [Priority(1)]
+        [TestCategory("NoException")]
         public void FileNameDoesExist()
         {
             //Arrange
@@ -76,6 +82,10 @@ namespace MyClassesTests
         }
 
         [TestMethod]
+        [Description("Check to see if a file does Not exist")]
+        [Owner("mosesb")]
+        [Priority(1)]
+        [TestCategory("NoException")]
         public void FileNameDoesNotExist()
         {
             //Arrange
@@ -90,6 +100,10 @@ namespace MyClassesTests
         }
 
         [TestMethod]
+        [Owner("mosesb")]
+        [Description("Check to see if there's an empty string for file name or file name not entered at all")]
+        [Priority(2)]
+        [TestCategory("Exception")]
         [ExpectedException(typeof(ArgumentNullException))]
         public void FileNameNullOrEmpty_ThrowsArgumentNullException()
         {
@@ -112,6 +126,32 @@ namespace MyClassesTests
                 _goodFileName = _goodFileName.Replace("[AppPath]",
                     Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData));
             }
+        }
+
+        [TestMethod]
+        [Owner("mosesb")]
+        [DeploymentItem(FILE_NAME)]
+        public void FileNameDoesExistUsingDeploymentItem()
+        {
+            //arrange
+            FileProcess fp = new FileProcess();
+            string fileName;
+
+            fileName = TestContext.DeploymentDirectory + @"\" + FILE_NAME;
+            TestContext.WriteLine("Checking file: " + fileName);
+
+            //act
+            var actual = fp.FileExists(fileName);
+
+            //assert
+            Assert.IsTrue(actual);
+        }
+
+        [TestMethod]
+        [Timeout(2000)]
+        public void SetTimeout()
+        {
+            System.Threading.Thread.Sleep(4000);
         }
     }
 }
