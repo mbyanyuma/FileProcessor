@@ -39,7 +39,7 @@ namespace MyClassesTests
         [TestInitialize]
         public void TestInitialize()
         {
-            if (TestContext.TestName == "FileNameDoesExist")
+            if (TestContext.TestName.StartsWith("FileNameDoesExist"))
             {
                 SetGoodFileName();
                 if (!string.IsNullOrEmpty(_goodFileName))
@@ -53,13 +53,57 @@ namespace MyClassesTests
         [TestCleanup]
         public void TestCleanup()
         {
-            if (!string.IsNullOrEmpty(_goodFileName))
+            if (TestContext.TestName.StartsWith("FileNameDoesExist"))
             {
-                TestContext.WriteLine("Deleting the file: " + _goodFileName);
-                File.Delete(_goodFileName);
+                if (!string.IsNullOrEmpty(_goodFileName))
+                {
+                    TestContext.WriteLine("Deleting the file: " + _goodFileName);
+                    File.Delete(_goodFileName);
+                }
             }
+            
         }
-            #endregion
+        #endregion
+
+        [TestMethod]
+        [DataSource("System.Data.SqlClient",
+            "Server=LAPTOP-6ICNF0TN\\SQLEXPRESS;Database=FileProcessDB;Integrated Security=Yes",
+            "tests.FileProcessTest",
+            DataAccessMethod.Sequential)]
+        public void FileExistsTestFromDb()
+        {
+            FileProcess fp = new FileProcess();
+            string fileName;
+            bool expectedValue;
+            bool causesException;
+
+            //get values from data row
+            fileName = TestContext.DataRow["FileName"].ToString();
+            expectedValue = Convert.ToBoolean(TestContext.DataRow["ExpectedValue"]);
+            causesException = Convert.ToBoolean(TestContext.DataRow["CausesException"]);
+
+            //check assertion
+            try
+            {
+                var actual = fp.FileExists(fileName);
+                Assert.AreEqual(expectedValue, actual, "File Name: " + fileName +
+                                                       "doesn't seem to exist according to the code in test method: FileExistsTestFromDb()");
+            }
+            catch (AssertFailedException m)
+            {
+                //rethrow assertion
+                throw m;
+            }
+            catch (ArgumentNullException)
+            {
+                // See if method was expected to throw an exception
+                Assert.IsTrue(causesException);
+            }
+
+
+
+        }
+
 
         [TestMethod]
         [Description("Check to see if a file does exist")]
@@ -153,5 +197,17 @@ namespace MyClassesTests
         {
             System.Threading.Thread.Sleep(4000);
         }
+
+        [TestMethod]
+        public void FileNameDoesExistMessageWithFormatting()
+        {
+
+            FileProcess fp = new FileProcess();
+
+            var actual = fp.FileExists(_goodFileName);
+
+            Assert.IsFalse(actual, "File '{0}' does not exist", _goodFileName);
+        }
+
     }
 }
